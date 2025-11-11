@@ -11,7 +11,7 @@
             <a href="<%= baseUrl %>/">Home</a> | 
             <a href="<%= baseUrl %>/about">About</a> | 
             <a href="<%= baseUrl %>/books/search">Search</a> | 
-            <a href="<%= baseUrl %>users/register">Register</a> | 
+            <a href="<%= baseUrl %>/users/register">Register</a> | 
             <a href="<%= baseUrl %>/books/addbook">Add Book</a> | 
             <a href="<%= baseUrl %>/books/list">List Books</a> |
             <a href="<%= baseUrl %>/books/bargainbooks">Bargain Books</a>
@@ -32,7 +32,7 @@
             <% } else { %>
                 <p>We appologise, no books were found matching your search!</p>
             <% } %>
-            <p style ="margin-top:20px;"><a href="/books/search">Try another search ?</a>
+            <p style ="margin-top:20px;"><a href="<%= baseUrl %>/books/search">Try another search ?</a>
             </p>          
     </body>
 </html>
