@@ -1,1 +1,1 @@
-home = "http://doc.gold.ac.uk/usr/311"
+home = http://doc.gold.ac.uk/usr/311
