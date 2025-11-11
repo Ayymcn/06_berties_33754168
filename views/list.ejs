@@ -32,7 +32,7 @@
         <ul>
             <% availableBooks.forEach(function(book) { %>
                 <li>
-                    <%= book.name %> &pound; <%= book.price %>
+                    <%= book.name %> £; <%= book.price %>
                     <form action="/books/delete" method="post" style="margin:0;">
                         <input type="hidden" name="bookId" value="<%= book.id %>">
                         <input type="submit" value="Delete" style="background-color: #0b08dd;">
