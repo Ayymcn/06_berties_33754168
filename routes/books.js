@@ -73,7 +73,7 @@ router.post('/delete', function(req, res, next){
         }
         else
             console.log(result.affectedRows + " record(s) deleted");
-            res.redirect('/books/list');
+            res.redirect(res.locals.baseUrl + '/books/list');
     });
 });
 
