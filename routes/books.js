@@ -55,9 +55,10 @@ router.post('/bookadded', function(req, res, next){
         if (err) {
             next(err)
         }
-        else 
+        else {
             res.send(`<p>This book has been added to the database, name: ${req.body.name}. price: £${req.body.price}</p>
             <a href="/">Back to home</a>`)
+        }
     });
 });
 
@@ -71,9 +72,10 @@ router.post('/delete', function(req, res, next){
         if (err) {
             next(err)
         }
-        else
+        else{
             console.log(result.affectedRows + " record(s) deleted");
             res.redirect(res.locals.baseUrl + '/books/list');
+        }
     });
 });
 
