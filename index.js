@@ -8,6 +8,31 @@ var mysql = require('mysql2')
 const app = express()
 const port = 8000
 
+/* 
+   ISSUE FIX: because the delete link takes 
+   you to /books/list in my local server, 
+   when running it into vm it doesnt know it is 
+   on the vm so cant find the correct format 
+   /usr/..., and if changing the links here all 
+   to /usr/..., the links in my local server 
+   will be broken, instead we added some kind 
+   of logic so that it detects which machine 
+   it is working on to correctly choose the 
+   link pathh (done using ai)
+*/
+const isProduction = process.env.NODE_ENV === 'production';
+const baseUrl = isProduction ? '/usr/311' : '';
+/* 
+   The idea is that we check the NODE_ENV,
+    if it's set on production (which we ve done 
+    also on vm), it sets baseUrl to /usr/311/,
+     otherwise it keeps it blank ''*/
+app.use((req, res, next) => {
+    res.locals.baseUrl = baseUrl;
+    res.locals.shopData = {shopName: "Bertie's Books"};
+    next();
+});
+
 // Defining the database connection
 const db = mysql.createPool({
     host: 'localhost',
@@ -28,9 +53,6 @@ app.use(express.urlencoded({ extended: true }))
 
 // Setting up public folder (for css and static js)
 app.use(express.static(path.join(__dirname, 'public')))
-
-// Defining our application-specific data
-app.locals.shopData = {shopName: "Bertie's Books"}
 
 // Loading the route handlers
 const mainRoutes = require("./routes/main")
