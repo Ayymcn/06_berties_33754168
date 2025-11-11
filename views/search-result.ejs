@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Search Results - <%=shopData.shopName%></title>
+        <link rel="stylesheet"  type="text/css" href="/main.css" />
+    </head>
+    <body>
+        <div class="container">
+            <nav>
+                <p>
+                    <a href="/">Home</a> | 
+                    <a href="/about">About</a> | 
+                    <a href="/books/search">Search</a> | 
+                    <a href="/users/register">Register</a> | 
+                    <a href="/books/addbook">Add Book</a> | 
+                    <a href="/books/list">List Books</a> |
+                    <a href="/books/bargainbooks">Bargain Books</a>
+                </p>
+            </nav>
+            <hr>
+            <h1>Search Results for: "<%= search_text %>"</h1>
+
+            <% if (availableBooks.length > 0) { %>
+                <p>Here are the books that match your search: </p>
+                <ul>
+                    <% availableBooks.forEach(function(book) { %>
+                        <li>
+                            <%= book.name %> &pound, <%= book.price %>
+                        </li>
+                    <% }); %>
+                </ul>
+            <% } else { %>
+                <p>We appologise, no books were found matching your search!</p>
+            <% } %>
+            <p style ="margin-top:20px;"><a href="/books/search">Try another search ?</a>
+            </p>          
+    </body>
+</html>

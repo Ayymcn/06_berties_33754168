@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>About <%=shopData.shopName%></title>
+    <title>Add Book - <%=shopData.shopName%></title>
     <link rel="stylesheet"  type="text/css" href="/main.css" />
   </head>
   <body>
@@ -13,14 +13,15 @@
             <a href="/books/search">Search</a> | 
             <a href="/users/register">Register</a> | 
             <a href="/books/addbook">Add Book</a> | 
-            <a href="/books/list">List Books</a> |
-            <a href="/books/bargainbooks">Bargain Books</a>
+            <a href="/books/list">List Books</a>
         </p>
     </nav>
     <hr>
-    <h1>About <%=shopData.shopName%></h1>
-    <p>Welcome to Bertie's Books, your new favourite online bookshop! 
-      We are a small shop dedicated to helping you find your next great read. 
-      Browse our collection to see what we have in stock.</p>
+    <h1>Bertie's Books Shop</h1>
+    <form method="POST" action="/books/bookadded">
+      <p>Book name: <input id="name" type="text" name="name" required/></p>
+      <p>Price: <input id="price" type="number" name="price" step="0.01" required/></p>
+      <input type="submit" value="Add Book" />
+    </form>
   </body>
 </html>

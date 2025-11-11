@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Bargain Books - <%=shopData.shopName%></title>
+        <link rel="stylesheet"  type="text/css" href="/main.css" />
+    </head>
+    <body>
+        <div class="container">
+            <nav>
+                <p>
+                    <a href="/">Home</a> | 
+                    <a href="/about">About</a> | 
+                    <a href="/books/search">Search</a> | 
+                    <a href="/users/register">Register</a> | 
+                    <a href="/books/addbook">Add Book</a> | 
+                    <a href="/books/list">List Books</a> |
+                    <a href="/books/bargainbooks">Bargain Books</a>
+                </p>
+            </nav>
+            <hr>
+            <h1>Bargain Books under £20.00: </h1>
+            <ul>
+                <% bargainBooks.forEach(function(book){ %>
+                    <li>
+                        <%=book.name%> &pound; <%=book.price %>   
+                    </li>
+                <% }); %>
+            </ul>
+    </body>
+</html>

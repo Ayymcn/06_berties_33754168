@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Welcome to <%=shopData.shopName%></title>
+        <link rel="stylesheet"  type="text/css" href="/main.css" />
+        <!-- adding style block to delete button next to every item--> 
+        <style>
+            li {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+    <nav>
+        <p>
+            <a href="/">Home</a> | 
+            <a href="/about">About</a> | 
+            <a href="/books/search">Search</a> | 
+            <a href="/users/register">Register</a> | 
+            <a href="/books/addbook">Add Book</a> | 
+            <a href="/books/list">List Books</a> |
+            <a href="/books/bargainbooks">Bargain Books</a>
+        </p>
+    </nav>
+    <hr>
+        <h1>Bertie's Books Shop</h1>
+        <p>Here are the books that we sell:</p>
+        <ul>
+            <% availableBooks.forEach(function(book) { %>
+                <li>
+                    <%= book.name %> &pound; <%= book.price %>
+                    <form action="/books/delete" method="post" style="margin:0;">
+                        <input type="hidden" name="bookId" value="<%= book.id %>">
+                        <input type="submit" value="Delete" style="background-color: #0b08dd;">
+                    </form>
+                </li>
+            <% }); %>
+        </ul>
+    </body>        
+</html>
