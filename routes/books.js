@@ -56,8 +56,9 @@ router.post('/bookadded', function(req, res, next){
             next(err)
         }
         else {
-            res.send(`<p>This book has been added to the database, name: ${req.body.name}. price: £${req.body.price}</p>
-            <a href="/">Back to home</a>`)
+            res.render('book-added', 
+                { name: req.body.name, price: req.body.price}
+            );
         }
     });
 });
@@ -73,8 +74,7 @@ router.post('/delete', function(req, res, next){
             next(err)
         }
         else{
-            console.log(result.affectedRows + " record(s) deleted");
-            res.redirect(res.locals.baseUrl + '/books/list');
+            res.render('delete-confirm.ejs');
         }
     });
 });
