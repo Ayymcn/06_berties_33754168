@@ -77,5 +77,7 @@ if (isProduction) {
     app.get(baseUrl + '/', (req, res) => res.send('PROD: main route works!'));
 }
 
+console.log('Adding test route for direct check...');
+app.get('/test123', (req, res) => res.send('TEST SUCCESS'));
 // Starting the web app listening
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
