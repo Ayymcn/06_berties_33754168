@@ -54,17 +54,22 @@ app.use(express.urlencoded({ extended: true }))
 // Setting up public folder (for css and static js)
 app.use(express.static(path.join(__dirname, 'public')))
 
-// Loading the route handlers
-const mainRoutes = require("./routes/main")
-app.use('/', mainRoutes)
+// -- ROUTE HANDLERS --
+const mainRoutes = require('./routes/main');
+const usersRoutes = require('./routes/users'); 
+const booksRoutes = require('./routes/books');
 
-// Loading the route handlers for /users
-const usersRoutes = require('./routes/users')
-app.use('/users', usersRoutes)
-
-// Loading the route handlers for /books
-const booksRoutes = require('./routes/books')
-app.use('/books', booksRoutes)
+if (isProduction) {
+    app.use(baseUrl + '/', mainRoutes);
+    app.use(baseUrl + '/users', usersRoutes);
+    app.use(baseUrl + '/books', booksRoutes);
+    app.use(baseUrl, express.static(path.join(__dirname, 'public')));
+    } else {
+    app.use('/', mainRoutes);
+    app.use('/users', usersRoutes);
+    app.use('/books', booksRoutes);
+    app.use(express.static(path.join(__dirname, 'public')));
+    }
 
 // Starting the web app listening
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
