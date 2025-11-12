@@ -81,7 +81,7 @@ router.post('/delete', function(req, res, next){
 
 // Bargain books route
 router.get('/bargainbooks', function(req, res, next){
-    let sqlquery = "SELECT * FROM books WHERE price < 20.00";
+    let sqlquery = "SELECT * FROM books WHERE price <= 20.00";
     // executing the query
     db.query(sqlquery, (err, result) => {
         if (err) {
