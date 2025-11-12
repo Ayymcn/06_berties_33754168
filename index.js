@@ -20,8 +20,10 @@ const port = 8000
    it is working on to correctly choose the 
    link pathh (done using ai)
 */
+console.log('NODE_ENV:', process.env.NODE_ENV);
 const isProduction = process.env.NODE_ENV === 'production';
 const baseUrl = isProduction ? '/usr/311' : '';
+console.log('baseUrl:', baseUrl);
 /* 
    The idea is that we check the NODE_ENV,
     if it's set on production (which we ve done 
