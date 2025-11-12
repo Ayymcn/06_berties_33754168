@@ -71,5 +71,9 @@ if (isProduction) {
     app.use(express.static(path.join(__dirname, 'public')));
     }
 
+    if (isProduction) {
+    app.get(baseUrl + '/', (req, res) => res.send('PROD: main route works!'));
+}
+
 // Starting the web app listening
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
