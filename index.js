@@ -60,7 +60,7 @@ const usersRoutes = require('./routes/users');
 const booksRoutes = require('./routes/books');
 
 if (isProduction) {
-    app.use(baseUrl + '/', mainRoutes);
+    app.use(baseUrl, mainRoutes);
     app.use(baseUrl + '/users', usersRoutes);
     app.use(baseUrl + '/books', booksRoutes);
     app.use(baseUrl, express.static(path.join(__dirname, 'public')));
