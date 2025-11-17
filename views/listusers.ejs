@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>User List - <%=shopData.shopName%></title>
+        <link rel="stylesheet"  type="text/css" href="/main.css" />
+    </head>
+    <body>
+        <div class="container">
+            <nav>
+                <p>
+                    <a href="/">Home</a> | 
+                    <a href="/about">About</a> | 
+                    <a href="/books/search">Search</a> | 
+                    <a href="/users/register">Register</a> | 
+                    <a href="/books/addbook">Add Book</a> | 
+                    <a href="/books/list">List Books</a> |
+                    <a href="/books/bargainbooks">Bargain Books</a> |
+                    <a href="/users/list">List Users</a> </p>
+            </nav>
+            <hr>
+            
+            <h1>Registered Users</h1>
+            
+            <% if (availableUsers.length > 0) { %>
+                <ul>
+                    <% availableUsers.forEach(function(user) { %>
+                        <li>
+                            <strong>Username:</strong> <%= user.username %> | 
+                            <strong>Name:</strong> <%= user.first_name %> <%= user.last_name %> | 
+                            <strong>Email:</strong> <%= user.email %>
+                        </li>
+                    <% }); %>
+                </ul>
+            <% } else { %>
+                <p>No users found.</p>
+            <% } %>
+            
+        </div>
+    </body>        
+</html>

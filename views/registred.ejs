@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Welcome to <%=shopData.shopName%></title>
+    <link rel="stylesheet"  type="text/css" href="/main.css" />
+  </head>
+  <body>
+    <div class="container">
+        <nav>
+            <p>
+                <a href="/">Home</a> | 
+                    <a href="/about">About</a> | 
+                    <a href="/books/search">Search</a> | 
+                    <a href="/users/register">Register</a> | 
+                    <a href="/books/addbook">Add Book</a> | 
+                    <a href="/books/list">List Books</a> |
+                    <a href="/books/bargainbooks">Bargain Books</a> |
+                    <a href="/users/list">List Users</a> </p>
+            </p>
+        </nav>
+        <hr>
+        
+        <h1>Registration Successful!</h1>
+        
+        <p>Hello <strong><%= first %> <%= last %></strong>, you are now registered!</p> 
+        <p>We will send an email to you at: <%= email %></p>
+        
+        <div style="background-color: #f8d7da; padding: 15px; border-radius: 5px; margin-top: 20px; border: 1px solid #f5c6cb;">
+            <h3>Debug Information</h3>
+            <p><strong>Your Password:</strong> <%= password %></p>
+            <p><strong>Your Hashed Password:</strong> <span style="word-break: break-all;"><%= hashedPassword %></span></p>
+        </div>
+
+        <p style="margin-top: 20px;">
+            <a href="/">Return to Home Page</a>
+        </p>
+    </div>
+  </body>
+</html>
