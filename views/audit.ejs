@@ -1,0 +1,37 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Audit Log</title>
+    <link rel="stylesheet"  type="text/css" href="/main.css" />
+  </head>
+  <body>
+    <div class="container">
+        <h1>Login Activity Log</h1>
+        <table border="1" cellpadding="10" style="width: 100%; border-collapse: collapse;">
+            <tr style="background-color: #eee;">
+                <th>User</th>
+                <th>Action</th>
+                <th>Time</th>
+            </tr>
+            <% auditData.forEach(function(log) { %>
+                <tr>
+                    <td><%= log.username %></td>
+                    
+                    <% if (log.action == 'Success') { %>
+                        <td style="color: green;">
+                             <%= log.action %>
+                        </td>
+                    <% } else { %>
+                        <td style="color: red;">
+                             <%= log.action %>
+                        </td>
+                    <% } %>
+
+                    <td><%= log.attempt_time %></td>
+                </tr>
+            <% }); %>
+        </table>
+        <p><a href="/">Back Home</a></p>
+    </div>
+  </body>
+</html>

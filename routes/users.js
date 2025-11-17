@@ -53,36 +53,99 @@ router.get('/login', function (req, res, next) {
 
 // Handling login form submission
 router.post('/loggedin', function (req, res, next) {
+    // forcing inputs to strings to prevent crashes
+    let username = String(req.body.username || '');
+    let password = String(req.body.password || '');
+    // finding user in database
     let sqlquery = "SELECT * FROM users WHERE username = ?";
-
-    db.query(sqlquery, [req.body.username], (err, results) => {
+    db.query(sqlquery, [username], (err, results) => {
         if (err) {
             return next(err);
         }
 
         // checking if user exists
         if (results.length > 0) {
-            // getting the hashed password from the database
-            let hashedPassword = results[0].hashedPassword;
-
-            // comparing the hashed password with the entered password
-            bcrypt.compare(req.body.password, hashedPassword, function(err, isMatch) {
+            // getting the hashed password from the database and storing it in user
+            let user = results[0];
+            let now = new Date();
+            
+            // Security check: is the account locked ?
+            if (user.locked_until && new Date(user.locked_until) > now) {
+                // marking it in audit log
+                let auditQuery = "INSERT INTO login_audit (username, action) VALUES (?, ?)";
+                let auditData = [username, 'Fail - Account Locked'];
+                db.query(auditQuery, auditData, (err, result) => {
+                    if (err) {
+                        return next(err);
+                    }
+                // taking to account locked page
+                res.render('lockedout.ejs');
+            });
+                return; // stopping further processing
+            }
+            // checking the hashed password
+            bcrypt.compare(password, user.hashedPassword, function(err, isMatch) {
                 if (err) {
                     return next(err);
-                } 
-                else if (isMatch == true) {
-                    // Passwords match
-                    res.render('loggedin.ejs', { user: results[0] });
+                }
+                if (isMatch == true) {
+                    // passwords match & sudit successful login, (reseting counter to 0)
+                    let resetQuery = "UPDATE users SET failed_attempts = 0, locked_until = NULL WHERE id = ?"; 
+                    db.query(resetQuery, [user.id]);
+
+                    let auditQuery = "INSERT INTO login_audit (username, action) VALUES (?, ?)";
+                    db.query(auditQuery, [username, 'Success'], (err, result) => {
+                        if (err) {
+                            return next(err);
+                        }
+                    // taking to logged in page
+                    res.render('loggedin.ejs', { user: user });
+                    });
                 }
                 else {
-                    // Passwords don't match
-                    res.render('wrongpassword.ejs');
+                    // passwords don't match & audit failed login
+                    let attempts = user.failed_attempts + 1;
+                    let updateQuery = "UPDATE users SET failed_attempts = ? WHERE id = ?";
+                    let queryParams = [attempts, user.id];
+
+                    // if it is the third time, lock the account for one minute
+                    if (attempts >= 3) {
+                        let lockUntil = new Date(now.getTime() + 1 * 60000); 
+                        updateQuery = "UPDATE users SET failed_attempts = ?, locked_until = ? WHERE id = ?";
+                        queryParams = [attempts, lockUntil, user.id];
+                    }
+                    db.query(updateQuery, queryParams, (err, result) => {
+                        if (err) {
+                            return next(err);
+                        }
+                        let auditAction = (attempts >= 3) ? 'Fail - Account Locked' : 'Fail - Password';
+                        let auditQuery = "INSERT INTO login_audit (username, action) VALUES (?, ?)";
+                        db.query(auditQuery, [username, auditAction]);
+                        // taking to wrong password page
+                        res.render('wrongpassword.ejs');
+                    });
                 }
             });
         }
         else {
+            // user not found in database
+            let auditQuery = "INSERT INTO login_audit (username, action) VALUES (?, ?)";
+            auditData = [username, 'Fail - No User'];
+            db.query(auditQuery, auditData, (err, result) => {
             res.render('notfound.ejs');
+        });
         }
+    });
+});
+
+// Adding route to view login audit log
+router.get('/audit', function (req, res, next) {
+    let sqlquery = "SELECT * FROM login_audit ORDER BY attempt_time DESC";
+    db.query(sqlquery, (err, result) => {
+        if (err) {
+            return next(err);
+        }
+        res.render('audit.ejs', { auditData: result });
     });
 });
 

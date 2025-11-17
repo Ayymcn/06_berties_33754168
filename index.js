@@ -1,3 +1,6 @@
+// Loading environment variables from .env file
+require('dotenv').config();
+
 // Importing express and ejs and mysql
 var express = require ('express')
 var ejs = require('ejs')
@@ -8,12 +11,17 @@ var mysql = require('mysql2')
 const app = express()
 const port = 8000
 
+// debugging 
+console.log("Checking .env variables...");
+console.log("DB_HOST:", process.env.DB_HOST);
+console.log("DB_USER:", process.env.DB_USER);
+
 // Defining the database connection
 const db = mysql.createPool({
-    host: 'localhost',
-    user: 'berties_books_app',
-    password: 'qwertyuiop',
-    database: 'berties_books',
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
