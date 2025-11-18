@@ -73,3 +73,24 @@ input[type="submit"] {
 input[type="submit"]:hover {
     background-color: #0056b3; 
 }
+
+.login-btn {
+    background-color: #28a745; /* Green color */
+    color: white !important;   /* Force white text */
+    padding: 8px 15px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.login-btn:hover {
+    background-color: #218838;
+}
+
+.nav-container {
+    display: flex;
+    justify-content: space-between; /* Pushes Left links to left, Right links to right */
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}

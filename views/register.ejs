@@ -7,17 +7,22 @@
   <body>
     <div class="container">
     <nav>
-        <p>
-            <a href="/">Home</a> | 
-            <a href="/about">About</a> | 
-            <a href="/books/search">Search</a> | 
-            <a href="/users/register">Register</a> | 
-            <a href="/books/addbook">Add Book</a> | 
-            <a href="/books/list">List Books</a> |
-            <a href="/books/bargainbooks">Bargain Books</a> |
-            <a href="/users/list">List Users</a> </p> | 
-            <a href="/users/audit">Audit Log</a>
-        </p>
+        <div class="nav-container">
+            <div class="nav-left">
+                <a href="/">Home</a> | 
+                <a href="/about">About</a> | 
+                <a href="/books/search">Search</a> | 
+                <a href="/books/list">List Books</a> |
+                <a href="/books/bargainbooks">Bargain Books</a> |
+                <a href="/users/list">List Users</a> |
+                <a href="/users/audit">Audit Log</a>
+            </div>
+
+            <div class="nav-right">
+                <a href="/users/register">Register</a>
+                <a href="/users/login" class="login-btn" style="margin-left: 10px;">Login</a>
+            </div>
+        </div>
     </nav>
     <hr>
     <h1>Register for <%=shopData.shopName%></h1>

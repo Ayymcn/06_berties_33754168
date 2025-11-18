@@ -52,5 +52,10 @@ app.use('/', mainRoutes);
 app.use('/users', usersRoutes);
 app.use('/books', booksRoutes);
 
+// Adding error page route
+app.get('*', function(req, res, send) {
+    res.status(404).render('404.ejs');
+})
+
 // Starting the web app listening
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
