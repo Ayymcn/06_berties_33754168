@@ -149,5 +149,18 @@ router.get('/audit', function (req, res, next) {
     });
 });
 
+// Adding route to delete a user
+router.post('/delete', function (req, res, next) {
+    let sqlquery = "DELETE FROM users WHERE id = ?";
+    let userId = req.body.userId;
+    db.query(sqlquery, [userId], (err, result) => {
+        if (err) {
+            return next(err);
+        }
+        // redirecting the confirmation page
+        res.render('userdeleted.ejs');
+    });
+});
+
 // Exporting the router object so index.js can access it
 module.exports = router

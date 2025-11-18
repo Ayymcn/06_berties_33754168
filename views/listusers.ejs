@@ -30,6 +30,11 @@
                             <strong>Name:</strong> <%= user.first_name %> <%= user.last_name %> | 
                             <strong>Email:</strong> <%= user.email %>
                         </li>
+
+                        <form action="/users/delete" method="post" style="display: inline; margin-left: 10px;">
+                            <input type="hidden" name="userId" value="<%= user.id %>">
+                            <input type="submit" value="Delete" style="background-color: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;" onclick="return confirm('Are you sure you want to delete this user?');">
+                        </form>
                     <% }); %>
                 </ul>
             <% } else { %>
