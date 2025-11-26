@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 
 const redirectLogin = (req, res, next) => {
     if (!req.session.userId) {
-        res.redirect('/users/login'); // absolute path to avoid redirect loop issues
+        res.redirect('login'); // absolute path to avoid redirect loop issues
     } else {
         next();
     }
