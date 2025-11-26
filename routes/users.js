@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 
+const { check, validationResult } = require('express-validator');
+
 const redirectLogin = (req, res, next) => {
     if (!req.session.userId) {
         res.redirect('login'); // absolute path to avoid redirect loop issues
@@ -33,7 +35,17 @@ router.get('/register', function (req, res, next) {
     res.render('register.ejs');
 });
 
-router.post('/registered', function (req, res, next) {
+router.post('/registered', [check('email').isEmail().withMessage('Please enter a valid email address.'),
+    check('username').isLength({ min:5, max:20}).withMessage('Username must be 5-20 characters.'), 
+    check('password').isLength({min: 8}).withMessage('Password must be at least 8 characters long.'),
+    check('first').matches(/^[A-Za-z\s]+$/).withMessage('First name must contain only letters and spaces.'),
+    check('last').matches(/^[A-Za-z\s]+$/).withMessage('Last name must contain only letters and space')],
+    function (req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        res.render('./register')
+    }
+    else {
     const saltRounds = 10;
     const plainPassword = req.body.password;
     bcrypt.hash(plainPassword, saltRounds, function(err, hashedPassword) {
@@ -52,6 +64,7 @@ router.post('/registered', function (req, res, next) {
             });
         });
     });
+  }
 });
 
 router.get('/login', function (req, res, next) {
