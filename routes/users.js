@@ -107,23 +107,24 @@ router.post('/loggedin', function (req, res, next) {
                     return next(err);
                 }
                 if (isMatch == true) {
-                    // passwords match & sudit successful login, (reseting counter to 0)
-                    let resetQuery = "UPDATE users SET failed_attempts = 0, locked_until = NULL WHERE id = ?"; 
-                    db.query(resetQuery, [user.id]);
+    // Reset failed_attempts and unlock the user, then continue only after DB confirms reset
+    let resetQuery = "UPDATE users SET failed_attempts = 0, locked_until = NULL WHERE id = ?";
+    db.query(resetQuery, [user.id], (err) => {
+        if (err) return next(err);
 
-                    let auditQuery = "INSERT INTO login_audit (username, action) VALUES (?, ?)";
-                    db.query(auditQuery, [username, 'Success'], (err, result) => {
-                        if (err) {
-                            return next(err);
-                        }
-                    
-                    // saving user session when login is successful
-                    req.session.userId = req.body.username;
-                    
-                    // taking to logged in page
-                    res.render('loggedin.ejs', { user: user });
-                    });
-                }
+        let auditQuery = "INSERT INTO login_audit (username, action) VALUES (?, ?)";
+        db.query(auditQuery, [username, 'Success'], (err, result) => {
+            if (err) return next(err);
+
+            // Save user session only after DB confirms update
+            req.session.userId = req.body.username;
+
+            // Now render the logged in page
+            res.render('loggedin.ejs', { user: user });
+        });
+    });
+}
+
                 else {
                     // passwords don't match & audit failed login
                     let attempts = user.failed_attempts + 1;
