@@ -2,6 +2,8 @@
 const express = require("express")
 const router = express.Router()
 
+const { check, validationResult } = require('express-validator');
+
 //-- ROUTE HANDLERS --
 router.get('/search',function(req, res, next){
     res.render("search.ejs")
@@ -46,7 +48,15 @@ router.get('/addbook', function(req, res, next){
 });
 
 // Adding post route to save data
-router.post('/bookadded', function(req, res, next){
+router.post('/bookadded', [check('name').isLength({ min: 1, max: 100 }).withMessage('Book name is required and must be less than 100 characters'),
+    check('price').isFloat({ min: 0}).withMessage('Price must be a valid number and not negative.')
+], 
+    function(req, res, next){
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.render('./addbook')
+        }
+        else {
     // saving to the database
     let sqlquery = "INSERT INTO books (name, price) VALUES (?, ?)"
     // executing the query
@@ -61,6 +71,7 @@ router.post('/bookadded', function(req, res, next){
             );
         }
     });
+}
 });
 
 // Adding a post route to delete a book

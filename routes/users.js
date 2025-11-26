@@ -71,11 +71,18 @@ router.get('/login', function (req, res, next) {
     res.render('login.ejs');
 });
 
-router.post('/loggedin', function (req, res, next) {
-    let username = String(req.body.username || '');
+router.post('/loggedin', [check('username').isLength({ min:5, max:20}).withMessage('Username must be 5-20 characters.'),
+                        check('password').isLength({min: 8}).withMessage('Password must be at least 8 characters long.')], 
+                        function (req, res, next) {
+                            const errors = validationResult(req);
+                            if (!errors.isEmpty()) {
+                                return res.render('./login');
+                            }
+                            else {
+                                    let username = String(req.body.username || '');
     let password = String(req.body.password || '');
     let sqlquery = "SELECT * FROM users WHERE username = ?";
-    db.query(sqlquery, [username], (err, results) => {
+    db.query(sqlquery, (err, results) => {
         if (err) return next(err);
 
         if (results.length > 0) {
@@ -144,7 +151,7 @@ router.post('/loggedin', function (req, res, next) {
                 res.render('notfound.ejs');
             });
         }
-    });
+    });}
 });
 
 router.get('/audit', redirectLogin, function (req, res, next) {
