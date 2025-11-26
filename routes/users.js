@@ -3,6 +3,35 @@ const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
 
+const redirectLogin = (req, res, next) => {
+    if (!req.session.userId) {
+        res.redirect('./login') // redirect to the login page
+    } else {
+        next(); // move to the next middleware function
+    }
+}
+
+// Adding route to list all users
+router.get('/list', redirectLogin, function (req, res, next) {
+    let sqlquery = "SELECT * FROM users";
+    db.query(sqlquery, (err, result) => {
+        if (err) {
+            next(err)
+        }
+        res.render('listusers.ejs', { availableUsers:result });
+    });
+});
+
+// adding logout route
+router.get('/logout', redirectLogin, (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            return res.redirect('/')
+        }
+        res.render('logout.ejs');
+    })
+})
+
 // -- ROUTE HANDLERS --
 router.get('/register', function (req, res, next) {
     res.render('register.ejs')
@@ -33,17 +62,6 @@ router.post('/registered', function (req, res, next) {
            }); 
       });                                                                         
   });
-});
-
-// Adding route to list all users
-router.get('/list', function (req, res, next) {
-    let sqlquery = "SELECT * FROM users";
-    db.query(sqlquery, (err, result) => {
-        if (err) {
-            next(err)
-        }
-        res.render('listusers.ejs', { availableUsers:result });
-    });
 });
 
 // Displaying login page
@@ -98,6 +116,10 @@ router.post('/loggedin', function (req, res, next) {
                         if (err) {
                             return next(err);
                         }
+                    
+                    // saving user session when login is successful
+                    req.session.userId = req.body.username;
+                    
                     // taking to logged in page
                     res.render('loggedin.ejs', { user: user });
                     });
@@ -138,8 +160,8 @@ router.post('/loggedin', function (req, res, next) {
     });
 });
 
-// Adding route to view login audit log
-router.get('/audit', function (req, res, next) {
+// Adding route to view login audit log (only logged in users can view the audit log)
+router.get('/audit', redirectLogin, function (req, res, next) {
     let sqlquery = "SELECT * FROM login_audit ORDER BY attempt_time DESC";
     db.query(sqlquery, (err, result) => {
         if (err) {
@@ -149,8 +171,8 @@ router.get('/audit', function (req, res, next) {
     });
 });
 
-// Adding route to delete a user
-router.post('/delete', function (req, res, next) {
+// Adding route to delete a user (only logged in users can delete users)
+router.post('/delete', redirectLogin, function (req, res, next) {
     let sqlquery = "DELETE FROM users WHERE id = ?";
     let userId = req.body.userId;
     db.query(sqlquery, [userId], (err, result) => {

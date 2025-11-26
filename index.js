@@ -7,6 +7,9 @@ var ejs = require('ejs')
 const path = require('path')
 var mysql = require('mysql2')
 
+// Importing express session
+var session = require('express-session')
+
 // Creating the express application object
 const app = express()
 const port = 8000
@@ -47,6 +50,16 @@ app.use(express.static(path.join(__dirname, 'public')))
 const mainRoutes = require('./routes/main');
 const usersRoutes = require('./routes/users'); 
 const booksRoutes = require('./routes/books');
+
+// creating a session
+app.use(session({
+    secret: 'somerandomstuff',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+        expire: 600000
+    }
+}))
 
 app.use('/', mainRoutes);
 app.use('/users', usersRoutes);
