@@ -9,8 +9,11 @@ router.get('/search',function(req, res, next){
     res.render("search.ejs")
 });
 
-router.get('/search-result', function (req, res, next) {
-    let keyword = req.query.search_text;
+router.get('/search-result', [
+    check('search_text').isLength({min:1, max:100 }).withMessage('search term required, max 100chars.').matches(/^[\w\s\-']+$/).withMessage('only letters, numbers, spaces,-, apostrophes allowed')
+], 
+    function (req, res, next) {
+    let keyword = req.sanitize(req.query.search_text);
     // For advanced search logic we use 'LIKE',
     // The % is a wildcard!
     // 'World' -> finds exactly word 'World'
@@ -54,7 +57,7 @@ router.post('/bookadded', [check('name').isLength({ min: 1, max: 100 }).withMess
     function(req, res, next){
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.render('./addbook')
+            return res.render('addbook', { errors: errors.array() })
         }
         else {
     // saving to the database
@@ -67,7 +70,7 @@ router.post('/bookadded', [check('name').isLength({ min: 1, max: 100 }).withMess
         }
         else {
             res.render('book-added', 
-                { name: req.body.name, price: req.body.price}
+                { name: req.sanitize(req.body.name), price: req.sanitize(req.body.price)}
             );
         }
     });

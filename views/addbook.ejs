@@ -7,6 +7,13 @@
   <body>
     <nav>
         <div class="nav-container">
+          <% if (typeof errors !== 'undefined' && errors.length > 0) { %>
+      <ul style="color:red;">
+        <% errors.forEach(e => { %>
+          <li><%= e.msg %></li>
+        <% }) %>
+      </ul>
+    <% } %>
             <div class="nav-left">
                 <a href="/">Home</a> | 
                 <a href="/about">About</a> | 

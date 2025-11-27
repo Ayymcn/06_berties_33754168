@@ -1,73 +1,159 @@
-# Bertie's Books - Secure Web Application
+# Bertie's Books - Secure Web Application ...................................
 
-This project is a data-driven web application for a bookshop, developed using Node.js and MySQL. This version (Lab 7) focuses on data security, specifically implementing password hashing, secure login authentication, credential management, and audit logging.
+A secure multi-user bookshop management web app (Labs 8/9).
+Built with Node.js, Express, MySQL, EJS.
+Implements password hashing, safe login/logout, audit logging, account lockout, input validation, input sanitisation (XSS protection), and easy, repeatable deployment.
 
-## Technologies Used
+...........................................................................
 
-* **Node.js & Express:** Server-side framework for handling routes and middleware.
-* **MySQL:** Relational database for storing books, users, and audit logs.
-* **EJS:** Templating engine for rendering dynamic HTML views.
-* **Bcrypt:** Library used for hashing and salting passwords to ensure secure storage.
-* **Dotenv:** Module for managing environment variables and securing database credentials.
+# Technologies Used
+* Node.js & Express             : Routing, middleware, sessions
+* MySQL                         : Database for users, books, login audits
+* EJS                           : Dynamic HTML templating
+* bcrypt                        : Secure password storage
+* express-validator             : Validates all forms server-side
+* express-sanitizer             : Blocks XSS; scrubs user input
+* dotenv                        : Loads DB credentials from .env file
+* express-session               : Handles authentication and stateful login/logout
 
-## Installation & Setup
+...........................................................................
 
-1.  **Install Dependencies:**
-    Run the following command to install the required node modules (express, mysql, bcrypt, dotenv, etc.):
-    ```bash
-    npm install
-    ```
+# Installation & Setup
 
-2.  **Database Setup:**
-    * Log into MySQL and run the `create_db.sql` script to set up the `books`, `users`, and `login_audit` tables.
-    * Run `insert_test_data.sql` to populate the database with initial books and the default user ('gold').
+1. Clone the Repository
+    $ git clone <repo-url>
+    $ cd 06_berties_33754168
 
-3.  **Environment Configuration:**
-    * Create a file named `.env` in the root directory.
-    * Add your database credentials (see "Extension: Dotenv" below).
+2. Install Dependencies
+    $ npm install
 
-4.  **Run the Application:**
-    ```bash
-    npm start
-    ```
+3. Set Environment Variables
+   - Create a `.env` file in your project root.
+   - Add either:
+        BB_HOST=localhost
+        BB_USER=berties_books_app
+        BB_PASSWORD=qwertyuiop
+        BB_DATABASE=berties_books
+     Or:
+        DB_HOST=localhost
+        DB_USER=berties_books_app
+        DB_PASSWORD=qwertyuiop
+        DB_NAME=berties_books
 
-## Security Features & Extensions
+4. Database Setup
+   - Drop the old database if needed (for a fresh install).
+   - In MySQL, run:
+        mysql -u root -p < create_db.sql
+        mysql -u root -p < patch_users_table.sql      # update user table if needed
+        mysql -u root -p < insert_test_data.sql
 
-### Password Hashing
-User passwords are never stored in plain text. When a user registers, their password is salted and hashed using `bcrypt` (10 salt rounds) before being inserted into the database. During login, `bcrypt.compare` is used to verify the input against the stored hash.
+5. Grant Database User Privileges (in MySQL shell)
+      CREATE USER IF NOT EXISTS 'berties_books_app'@'localhost' IDENTIFIED BY 'qwertyuiop';
+      GRANT ALL PRIVILEGES ON berties_books.* TO 'berties_books_app'@'localhost';
 
-### Extension: Dotenv (Task 5)
-To improve security, database credentials (host, username, password, database name) have been removed from the source code (`index.js`). 
+6. Run the Application
+    $ node index.js
+   (or for VM/background run:)
+    $ npx forever index.js
 
-* **Implementation:** I used the `dotenv` package to load these values from a separate `.env` file.
-* **Usage:** In `index.js`, the database connection pool now uses `process.env.DB_USER`, `process.env.DB_PASSWORD`, etc.
-* **Benefit:** This prevents sensitive passwords from being exposed in version control systems like GitHub.
+...........................................................................
 
-### Extension: Audit Logging (Task 6)
-A security mechanism has been implemented to track all access attempts to the system.
+# Security Features & Activities
 
-* **Database:** A table named `login_audit` was created with columns for `username`, `action`, and `attempt_time`.
-* **Logic:** The login route (`/users/loggedin`) inserts a record for every attempt:
-    * **Success:** Logs a successful login.
-    * **Fail:** Logs the reason (e.g., "Fail - Password", "Fail - No User", "Fail - Account Locked").
-* **Viewing Logs:** An administrator view is available at `/users/audit` to inspect the login history.
+* Password Hashing
+    - User passwords are hashed and salted before storage via bcrypt; never stored plain.
+    - Password comparison at login is done securely with bcrypt.compare.
 
-### Extra Research: Account Locking
-As an additional security measure, I implemented an account lockout policy to prevent brute-force attacks.
+* Secure Authentication, Session & Logout
+    - Users log in securely; sessions protect user identity and prevent cross-user access.
+    - Logout feature added: users can safely end their session.
+    - Session destroyed on logout; no sensitive info persists.
 
-* **Mechanism:** The `users` table tracks `failed_attempts` and a `locked_until` timestamp.
-* **Policy:** If a user enters an incorrect password **3 times**, their account is locked for **10 minutes**.
-* **Behavior:** During the lockout period, even a correct password will result in a "Locked Account" message, and the attempt is logged in the audit trail.
+* Account Lockout
+    - After three failed login attempts, accounts are locked for 1 minute to prevent brute force.
+    - Lockout status and failed login attempts stored in the users table.
 
-## Routes Overview
+* Audit Logging
+    - Every login, logout, failed login, and account lockout is recorded in login_audit.
+    - Audit records show timestamp, username, and activity reason.
+    - Admin view for audits at '/users/audit' route.
 
-* `/` - Home page.
-* `/about` - About page.
-* `/books/list` - Lists available books.
-* `/books/search` - Search for books by name or title.
-* `/books/addbook` - Allows you to add a book to the list.
-* `/books/bargainbooks` - Dhows you all books that is less or equal to 20pounds.
-* `/users/register` - Register a new user (hashed password).
-* `/users/login` - Login page.
-* `/users/list` - Lists registered users (hides sensitive data).
-* `/users/audit` - Displays the security login log.
+* Input Validation
+    - Registration, login, book add/search fields all validated via express-validator.
+        - Email must be valid
+        - Username: 5–20 characters
+        - Password: minimum 8 characters for registration ('aaaaAAAA1234!' accepted)
+        - Name fields: only letters and spaces
+        - Book fields: validated length, allowed chars
+    - Marker can always log in with 'gold'/'smiths' (login validation allows short password).
+
+* Input Sanitisation
+    - All user-entered text is sanitised with express-sanitizer before saving or showing anywhere on the site.
+    - Prevents XSS: e.g., <script>alert(1)</script> becomes harmless text.
+    - Passwords: validated and hashed only, never sanitized for security.
+
+* Environment-Based Configuration
+    - Supports both BB_* and DB_* sets of environment variables for credentials.
+    - Credentials are NOT hard-coded anywhere.
+
+...........................................................................
+
+# How to Test & Mark
+
+- Register a user with password 'aaaaAAAA1234!' (proves strong password policy).
+- Log in with user 'gold', password 'smiths' (always possible for marking).
+- Enter '<script>alert(1)</script>' in any field—have it removed in confirmation (proves XSS protection).
+- After 3 failed login attempts, ensure account locks for 1 minute and shows lock status in audit.
+- Log out to fully destroy session and prevent reuse—logout option visible on secure pages.
+- All install and test steps succeed from a fresh git clone and blank DB.
+
+...........................................................................
+
+# Route Overview
+
+/                   Home page (public)
+/about              About the system
+/books/list         List all books
+/books/search       Search books
+/books/addbook      Add a book (validation & sanitisation)
+/books/bargainbooks List bargains (≤ £20)
+/users/register     Register user (secure/validated)
+/users/login        Login page
+/users/logout       Log out and destroy session
+/users/list         List users (admin)
+/users/audit        Login & logout audit log
+
+...........................................................................
+
+# Troubleshooting
+
+* If install fails, check .env, DB user grants, and rerun the SQL scripts.
+* For any registration or login problems, verify you are passing validation and sanitisation in all form handlers.
+* If XSS not blocked, check the use of express-sanitizer on all fields.
+* If logout does not destroy session, check the session config in index.js.
+
+...........................................................................
+
+# Security Reasoning
+
+- All user-facing forms validated and sanitized prior to DB insert or display
+- Passwords are always validated and securely hashed (never sanitized)
+- Internal fields like hashedPassword and user IDs are never displayed; sanitisation not needed
+- Logout feature ensures user privacy and session integrity
+- Audit log tracks all security-relevant actions (login, logout, lockouts, failures)
+
+...........................................................................
+
+# Usage Guide
+
+1. Register a new user via '/users/register'. Choose a strong password (8+ chars, any mix).
+2. Log in to the system—after 3 failed attempts, you'll be locked out for 1 minute.
+3. Browse books ('/books/list'), add new books ('/books/addbook'), or search titles ('/books/search').
+4. View bargain books under £20 at '/books/bargainbooks'.
+5. As an admin, view the users list and audit logs.
+6. Log out using '/users/logout'—your session is fully destroyed.
+7. For testing XSS, try submitting any field with '<script>alert(1)</script>'—the script will be removed (sanitised).
+
+...........................................................................
+
+END OF README

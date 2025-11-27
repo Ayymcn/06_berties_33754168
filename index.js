@@ -1,6 +1,9 @@
 // Loading environment variables from .env file
 require('dotenv').config();
 
+// input sanitizer
+const expressSanitizer = require('express-sanitizer');
+
 // Importing express and ejs and mysql
 var express = require ('express')
 var ejs = require('ejs')
@@ -13,6 +16,9 @@ var session = require('express-session')
 // Creating the express application object
 const app = express()
 const port = 8000
+
+//creating input sanitizer
+app.use(expressSanitizer());
 
 // debugging 
 console.log("Checking .env variables...");

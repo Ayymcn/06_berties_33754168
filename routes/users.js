@@ -36,14 +36,16 @@ router.get('/register', function (req, res, next) {
 });
 
 router.post('/registered', [check('email').isEmail().withMessage('Please enter a valid email address.'),
-    check('username').isLength({ min:5, max:20}).withMessage('Username must be 5-20 characters.'), 
-    check('password').isLength({min: 8}).withMessage('Password must be at least 8 characters long.'),
-    check('first').matches(/^[A-Za-z\s]+$/).withMessage('First name must contain only letters and spaces.'),
-    check('last').matches(/^[A-Za-z\s]+$/).withMessage('Last name must contain only letters and space')],
+    check('username').isLength({ min:2, max:20}).withMessage('Username must be 5-20 characters.'), 
+    check('password').isLength({min: 3}).withMessage('Password must be at least 2 characters long.'),
+    // commented out to check the hacking script of js
+    //check('first').matches(/^[A-Za-z\s]+$/).withMessage('First name must contain only letters and spaces.'),
+    // check('last').matches(/^[A-Za-z\s]+$/).withMessage('Last name must contain only letters and space')
+    ],
     function (req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        res.render('./register')
+        res.render('register', { errors: errors.array() })
     }
     else {
     const saltRounds = 10;
@@ -56,9 +58,9 @@ router.post('/registered', [check('email').isEmail().withMessage('Please enter a
         db.query(sqlquery, newrecord, (err, result) => {
             if (err) return next(err);
             res.render('registred.ejs', {
-                first: req.body.first,
-                last: req.body.last,
-                email: req.body.email,
+                first: req.sanitize(req.body.first),
+                last: req.sanitize(req.body.last),
+                email: req.sanitize(req.body.email),
                 password: plainPassword,
                 hashedPassword: hashedPassword
             });
@@ -71,18 +73,18 @@ router.get('/login', function (req, res, next) {
     res.render('login.ejs');
 });
 
-router.post('/loggedin', [check('username').isLength({ min:5, max:20}).withMessage('Username must be 5-20 characters.'),
-                        check('password').isLength({min: 8}).withMessage('Password must be at least 8 characters long.')], 
+router.post('/loggedin', [check('username').isLength({ min:2, max:20}).withMessage('Username must be 5-20 characters.'),
+                        check('password').isLength({min: 3}).withMessage('Password must be at least 8 characters long.')], 
                         function (req, res, next) {
                             const errors = validationResult(req);
                             if (!errors.isEmpty()) {
-                                return res.render('./login');
+                                return res.render('login', { errors: errors.array() });
                             }
                             else {
                                     let username = String(req.body.username || '');
     let password = String(req.body.password || '');
     let sqlquery = "SELECT * FROM users WHERE username = ?";
-    db.query(sqlquery, (err, results) => {
+    db.query(sqlquery, [username], (err, results) => {
         if (err) return next(err);
 
         if (results.length > 0) {
