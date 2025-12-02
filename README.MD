@@ -46,7 +46,8 @@ Implements password hashing, safe login/logout, audit logging, account lockout, 
         mysql -u root -p < create_db.sql
         mysql -u root -p < patch_users_table.sql      # update user table if needed
         mysql -u root -p < insert_test_data.sql
-
+You may need to use sudo or an admin MySQL account on your system.
+(Please make sure to run the three scripts of sql)
 5. Grant Database User Privileges (in MySQL shell)
       CREATE USER IF NOT EXISTS 'berties_books_app'@'localhost' IDENTIFIED BY 'qwertyuiop';
       GRANT ALL PRIVILEGES ON berties_books.* TO 'berties_books_app'@'localhost';
