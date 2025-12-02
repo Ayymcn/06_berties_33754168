@@ -56,6 +56,7 @@ app.use(express.static(path.join(__dirname, 'public')))
 const mainRoutes = require('./routes/main');
 const usersRoutes = require('./routes/users'); 
 const booksRoutes = require('./routes/books');
+const weatherRoutes = require('./routes/weather');
 
 // creating a session
 app.use(session({
@@ -70,6 +71,7 @@ app.use(session({
 app.use('/', mainRoutes);
 app.use('/users', usersRoutes);
 app.use('/books', booksRoutes);
+app.use('/', weatherRoutes);
 
 // Adding error page route
 app.get('*', function(req, res, send) {
