@@ -57,6 +57,7 @@ const mainRoutes = require('./routes/main');
 const usersRoutes = require('./routes/users'); 
 const booksRoutes = require('./routes/books');
 const weatherRoutes = require('./routes/weather');
+const apiRoutes = require('./routes/api');
 
 // creating a session
 app.use(session({
@@ -72,7 +73,7 @@ app.use('/', mainRoutes);
 app.use('/users', usersRoutes);
 app.use('/books', booksRoutes);
 app.use('/', weatherRoutes);
-
+app.use('/api', apiRoutes);
 // Adding error page route
 app.get('*', function(req, res, send) {
     res.status(404).render('404.ejs');

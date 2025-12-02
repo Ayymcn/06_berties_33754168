@@ -1,160 +1,188 @@
-# Bertie's Books - Secure Web Application ...................................
+#!/usr/bin/env bash
+#
+# Bertie's Books - Secure Bookshop App & Public API
+#
+# A secure, multi-user bookshop management web application and open REST API.
+# Built with Node.js, Express, MySQL, EJS. Features strong authentication,
+# input validation/sanitisation, audit logging, and external API integration.
+#
 
-A secure multi-user bookshop management web app (Labs 8/9).
-Built with Node.js, Express, MySQL, EJS.
-Implements password hashing, safe login/logout, audit logging, account lockout, input validation, input sanitisation (XSS protection), and easy, repeatable deployment.
+## Features & Technologies
 
-...........................................................................
+* Node.js + Express: Server, routing, sessions, REST API
+* MySQL: User/book/audit data storage
+* EJS: Dynamic HTML templating
+* bcrypt: Password hashing & salting
+* express-validator & express-sanitizer: Input validation and XSS prevention
+* dotenv: Safe environment variable configuration
+* Weather API: Live OpenWeatherMap integration
+* REST API: Filter, search, and sort books via /api/books
 
-# Technologies Used
-* Node.js & Express             : Routing, middleware, sessions
-* MySQL                         : Database for users, books, login audits
-* EJS                           : Dynamic HTML templating
-* bcrypt                        : Secure password storage
-* express-validator             : Validates all forms server-side
-* express-sanitizer             : Blocks XSS; scrubs user input
-* dotenv                        : Loads DB credentials from .env file
-* express-session               : Handles authentication and stateful login/logout
+## Installation & Setup
 
-...........................................................................
+# 1. Clone the repository
+git clone github.com/ayymcn/06_berties_33754168
+cd 06_berties_33754168
 
-# Installation & Setup
+# 2. Install Node.js dependencies
+npm install
+npm install request
 
-1. Clone the Repository
-    $ git clone <repo-url>
-    $ cd 06_berties_33754168
+# 3. Configure environment variables
+# Create .env file in root directory:
+cat > .env << EOF
+DB_HOST=localhost
+DB_USER=berties_books_app
+DB_PASSWORD=qwertyuiop
+DB_NAME=berties_books
+OPENWEATHER_API_KEY=your_api_key_here
+EOF
 
-2. Install Dependencies
-    $ npm install
+# 4. Database setup (run these in MySQL)
+mysql -u root -p < create_db.sql
+mysql -u root -p < patch_users_table.sql
+mysql -u root -p < insert_test_data.sql
 
-3. Set Environment Variables
-   - Create a `.env` file in your project root.
-   - Add either:
-        BB_HOST=localhost
-        BB_USER=berties_books_app
-        BB_PASSWORD=qwertyuiop
-        BB_DATABASE=berties_books
-     Or:
-        DB_HOST=localhost
-        DB_USER=berties_books_app
-        DB_PASSWORD=qwertyuiop
-        DB_NAME=berties_books
+# 5. Grant database user privileges
+mysql -u root -p -e "
+CREATE USER IF NOT EXISTS 'berties_books_app'@'localhost' IDENTIFIED BY 'qwertyuiop';
+GRANT ALL PRIVILEGES ON berties_books.* TO 'berties_books_app'@'localhost';
+FLUSH PRIVILEGES;
+"
 
-4. Database Setup
-   - Drop the old database if needed (for a fresh install).
-   - In MySQL, run:
-        mysql -u root -p < create_db.sql
-        mysql -u root -p < patch_users_table.sql      # update user table if needed
-        mysql -u root -p < insert_test_data.sql
-You may need to use sudo or an admin MySQL account on your system.
-(Please make sure to run the three scripts of sql)
-5. Grant Database User Privileges (in MySQL shell)
-      CREATE USER IF NOT EXISTS 'berties_books_app'@'localhost' IDENTIFIED BY 'qwertyuiop';
-      GRANT ALL PRIVILEGES ON berties_books.* TO 'berties_books_app'@'localhost';
+# 6. Start the application
+node index.js
+# Or for background run:
+# forever start index.js
 
-6. Run the Application
-    $ node index.js
-   (or for VM/background run:)
-    $ npx forever index.js
+## Security Features
 
-...........................................................................
+* Passwords: bcrypt-hashed, never stored plain text
+* Authentication: Session-based with account lockouts (3 failed attempts = 1min lock)
+* Audit Trail: Logs all logins, logouts, failures, and lockouts
+* Input Protection: All forms validated and sanitised (XSS prevention)
+* SQL Safety: Parameterized queries prevent injection attacks
+* Config: All secrets in .env (never committed to git)
 
-# Security Features & Activities
+## Route & API Overview
 
-* Password Hashing
-    - User passwords are hashed and salted before storage via bcrypt; never stored plain.
-    - Password comparison at login is done securely with bcrypt.compare.
+### Main Application Routes
+| Route | Description |
+|-------|-------------|
+| `/` | Home page (public) |
+| `/about` | About the system |
+| `/books/list` | List all books |
+| `/books/search` | Search books (validated) |
+| `/books/addbook` | Add books (server-side validation) |
+| `/books/bargainbooks` | Books under £20 |
+| `/users/register` | Secure user registration |
+| `/users/login` | Secure login |
+| `/users/logout` | Destroy session |
+| `/users/list` | List users (restricted) |
+| `/users/audit` | Audit log (admin only) |
+| `/weather` | Live weather by city |
 
-* Secure Authentication, Session & Logout
-    - Users log in securely; sessions protect user identity and prevent cross-user access.
-    - Logout feature added: users can safely end their session.
-    - Session destroyed on logout; no sensitive info persists.
+### REST API Endpoints
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/books` | All books as JSON |
+| `GET /api/books?search=term` | Search by book title |
+| `GET /api/books?minprice=5` | Filter min price |
+| `GET /api/books?max_price=10` | Filter max price |
+| `GET /api/books?sort=name` | Sort by name (A-Z) |
+| `GET /api/books?sort=price` | Sort by price (low-high) |
 
-* Account Lockout
-    - After three failed login attempts, accounts are locked for 1 minute to prevent brute force.
-    - Lockout status and failed login attempts stored in the users table.
+# Combined example:
+# curl "http://localhost:8000/api/books?search=brave&minprice=5&max_price=20&sort=price"
 
-* Audit Logging
-    - Every login, logout, failed login, and account lockout is recorded in login_audit.
-    - Audit records show timestamp, username, and activity reason.
-    - Admin view for audits at '/users/audit' route.
+## Weather API Integration
 
-* Input Validation
-    - Registration, login, book add/search fields all validated via express-validator.
-        - Email must be valid
-        - Username: 5–20 characters
-        - Password: minimum 8 characters for registration ('aaaaAAAA1234!' accepted)
-        - Name fields: only letters and spaces
-        - Book fields: validated length, allowed chars
-    - Marker can always log in with 'gold'/'smiths' (login validation allows short password).
+* Live city weather at `/weather` (uses OpenWeatherMap)
+* Supports any city: `/weather?city=London`
+* API key stored securely in .env
+* User-friendly error messages for invalid cities
+* Handles network errors and API rate limits
 
-* Input Sanitisation
-    - All user-entered text is sanitised with express-sanitizer before saving or showing anywhere on the site.
-    - Prevents XSS: e.g., <script>alert(1)</script> becomes harmless text.
-    - Passwords: validated and hashed only, never sanitized for security.
+## Usage & Testing
 
-* Environment-Based Configuration
-    - Supports both BB_* and DB_* sets of environment variables for credentials.
-    - Credentials are NOT hard-coded anywhere.
+# 1. Register a new user
+# Visit: http://localhost:8000/users/register
+# Use strong password (8+ chars, mix of types)
 
-...........................................................................
+# 2. Login
+# Visit: http://localhost:8000/users/login
+# Test credentials: username='gold', password='smiths'
 
-# How to Test & Mark
+# 3. Test book features
+# List: http://localhost:8000/books/list
+# Search: http://localhost:8000/books/search
+# Add book: http://localhost:8000/books/addbook
+# Bargains: http://localhost:8000/books/bargainbooks
 
-- Register a user with password 'aaaaAAAA1234!' (proves strong password policy).
-- Log in with user 'gold', password 'smiths' (always possible for marking).
-- Enter '<script>alert(1)</script>' in any field—have it removed in confirmation (proves XSS protection).
-- After 3 failed login attempts, ensure account locks for 1 minute and shows lock status in audit.
-- Log out to fully destroy session and prevent reuse—logout option visible on secure pages.
-- All install and test steps succeed from a fresh git clone and blank DB.
+# 4. Test security features
+# XSS test: Try '<script>alert(1)</script>' in any form
+# Lockout: Enter wrong password 3x for any user
+# Logout: http://localhost:8000/users/logout
 
-...........................................................................
+# 5. Test API endpoints
+curl http://localhost:8000/api/books
+curl "http://localhost:8000/api/books?search=world"
+curl "http://localhost:8000/api/books?minprice=10&max_price=20"
+curl "http://localhost:8000/api/books?sort=price"
 
-# Route Overview
+# 6. Test weather
+curl "http://localhost:8000/weather?city=Manchester"
+curl "http://localhost:8000/weather?city=Edinburgh"
+curl "http://localhost:8000/weather?city=Belfast"
 
-/                   Home page (public)
-/about              About the system
-/books/list         List all books
-/books/search       Search books
-/books/addbook      Add a book (validation & sanitisation)
-/books/bargainbooks List bargains (≤ £20)
-/users/register     Register user (secure/validated)
-/users/login        Login page
-/users/logout       Log out and destroy session
-/users/list         List users (admin)
-/users/audit        Login & logout audit log
+## Security Testing Checklist
 
-...........................................................................
+[ ] Register with strong password (8+ chars)
+[ ] Login with test user 'gold'/'smiths'
+[ ] XSS attempt blocked in all forms
+[ ] Account lockout after 3 failed logins
+[ ] Logout destroys session properly
+[ ] All API responses are JSON (no HTML)
+[ ] SQL parameters prevent injection
+[ ] .env file excluded from git (check .gitignore)
 
-# Troubleshooting
+## Troubleshooting
 
-* If install fails, check .env, DB user grants, and rerun the SQL scripts.
-* For any registration or login problems, verify you are passing validation and sanitisation in all form handlers.
-* If XSS not blocked, check the use of express-sanitizer on all fields.
-* If logout does not destroy session, check the session config in index.js.
+# Database connection issues
+# Check .env credentials and MySQL user privileges
+mysql -u berties_books_app -p berties_books -e "SHOW TABLES;"
 
-...........................................................................
+# API not filtering correctly
+# Check URL parameter names exactly match (minprice, max_price)
+curl -v "http://localhost:8000/api/books?minprice=5"
 
-# Security Reasoning
+# Weather not working
+# Verify OPENWEATHER_API_KEY in .env
+# Test API key: curl "https://api.openweathermap.org/data/2.5/weather?q=London&appid=YOUR_KEY"
 
-- All user-facing forms validated and sanitized prior to DB insert or display
-- Passwords are always validated and securely hashed (never sanitized)
-- Internal fields like hashedPassword and user IDs are never displayed; sanitisation not needed
-- Logout feature ensures user privacy and session integrity
-- Audit log tracks all security-relevant actions (login, logout, lockouts, failures)
+# Missing dependencies
+npm install express mysql2 ejs bcrypt express-validator express-sanitizer dotenv request
 
-...........................................................................
+## File Structure
 
-# Usage Guide
+.
+├── index.js              # Main Express app
+├── routes/
+│   ├── books.js         # Book routes (HTML)
+│   ├── main.js          # Home, about routes
+│   ├── api.js           # REST API endpoints
+│   └── users.js         # User auth routes
+|   └── weather.js       # Weather route
+├── views/               # EJS templates
+├── public/              # CSS file
+├── sql/                 # Database setup scripts
+│   ├── create_db.sql
+│   ├── patch_users_table.sql
+│   └── insert_test_data.sql
+├── .env                 # Secrets (NOT in git!)
+├── .gitignore           # Excludes .env, node_modules
+└── README.md            # This file
 
-1. Register a new user via '/users/register'. Choose a strong password (8+ chars, any mix).
-2. Log in to the system—after 3 failed attempts, you'll be locked out for 1 minute.
-3. Browse books ('/books/list'), add new books ('/books/addbook'), or search titles ('/books/search').
-4. View bargain books under £20 at '/books/bargainbooks'.
-5. As an admin, view the users list and audit logs.
-6. Log out using '/users/logout'—your session is fully destroyed.
-7. For testing XSS, try submitting any field with '<script>alert(1)</script>'—the script will be removed (sanitised).
+## API Response Format
 
-...........................................................................
-
-END OF README
+Success (200):
